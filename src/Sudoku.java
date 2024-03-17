@@ -1,7 +1,7 @@
 import java.util.Collection;
 import java.util.Set;
+
 import java.util.HashSet;
-import java.util.Iterator;
 
 public class Sudoku {
     private int[][] matrix;
@@ -13,7 +13,7 @@ public class Sudoku {
         this.size = innerSize*innerSize;
         this.matrix = new int[size][size];
 
-        // Initializa matrix to 0 (just in case)
+        // Initializes matrix to 0 (just in case)
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 matrix[i][j] = 0;
@@ -21,18 +21,44 @@ public class Sudoku {
         }
     }
 
-    public void generate() {
-        Set<Integer> availableNums = new HashSet<Integer>();
-        for (int i = 1; i <= size; i++) availableNums.add(i);
-        
-        boolean isValid = false;
-        while (!isValid && availableNums.size() > 0) {
-            int currentNumber = getRandomNumber(availableNums);
+    public void generate() throws InterruptedException {
+        generate(false);
+    }
 
-            isValid = generate(0, 0, currentNumber);
-            if (!isValid) matrix[0][0] = 0;
+    public void generate(boolean concurrent) throws InterruptedException {
+        
+        // Concurrent for learning purposes, slower than the other version (probably due to threads inicializations)
+        if (concurrent) { 
+            for (int i = 0; i < innerSize; i++) {
+                BoxGeneration[] boxGens = new BoxGeneration[innerSize];
+    
+                for (int j = 0; j < innerSize; j++) {
+                    int x = (innerSize * j + innerSize * i) % size;
+                    int y = innerSize * j;
+    
+                    BoxGeneration gen = new BoxGeneration(matrix, innerSize, size, x, y);
+                    boxGens[j] = gen;
+                    gen.start();
+                }
+    
+                for (int j = 0; j < innerSize; j++) {
+                    boxGens[j].join();
+                }    
+            }
+        }
+        else {
+            Set<Integer> availableNums = new HashSet<Integer>();
+            for (int i = 1; i <= size; i++) availableNums.add(i);
             
-            availableNums.remove(currentNumber);
+            boolean isValid = false;
+            while (!isValid && availableNums.size() > 0) {
+                int currentNumber = getRandomNumber(availableNums);
+    
+                isValid = generate(0, 0, currentNumber);
+                if (!isValid) matrix[0][0] = 0;
+                
+                availableNums.remove(currentNumber);
+            }
         }
     }
 

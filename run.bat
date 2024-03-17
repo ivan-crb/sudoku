@@ -1,4 +1,4 @@
-javac src/Main.java -cp src -d bin
+javac src/Game.java -cp src -d bin
 cd bin
-java Main
+java Game
 cd ../

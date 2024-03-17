@@ -1,6 +1,7 @@
 import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class Sudoku {
     private int[][] matrix;
@@ -23,7 +24,7 @@ public class Sudoku {
     public void generate() {
         Set<Integer> availableNums = new HashSet<Integer>();
         for (int i = 1; i <= size; i++) availableNums.add(i);
-
+        
         boolean isValid = false;
         while (!isValid && availableNums.size() > 0) {
             int currentNumber = getRandomNumber(availableNums);
@@ -48,7 +49,15 @@ public class Sudoku {
         if (row == size) return true;
 
         Set<Integer> availableNums = new HashSet<Integer>();
-        for (int i = 1; i <= size; i++) availableNums.add(i);
+        for (int i = 1; i <= size; i++) {
+            boolean validNum = true;
+
+            if (!horizontalCheck(row, col, i)) validNum = false;
+            if (!verticalCheck(row, col, i)) validNum = false;
+            if (!boxCheck(row, col, i)) validNum = false;
+
+            if (validNum) availableNums.add(i);
+        }
 
         boolean isValid = false;
         while (!isValid && availableNums.size() > 0) {
@@ -101,7 +110,7 @@ public class Sudoku {
 
         for (int i = 0; i < size; i++) {
             if (i % innerSize == 0 && i != 0) {
-                for (int j = 0; j < 3*(size+innerSize-1); j++) res += "_";
+                for (int j = 0; j < 3*(size+innerSize-1); j++) res += "-";
                 res += "\n";
             }
 
